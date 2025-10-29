@@ -1,73 +1,65 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-// Mock WordPress functions that are called directly in helper.php
-if (!function_exists('add_filter')) {
-    function add_filter($tag, $function_to_add) {
-        // Mock implementation
-    }
-}
-if (!function_exists('add_shortcode')) {
-    function add_shortcode($tag, $callback) {
-        // Mock implementation
-    }
-}
-if (!function_exists('is_rtl')) {
-    function is_rtl() {
-        return false;
-    }
-}
-if (!function_exists('__')) {
-    function __($text, $domain = 'default') {
-        return $text;
-    }
-}
-if (!function_exists('esc_html')) {
-    function esc_html($text) {
-        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-    }
+require_once 'app/functions/helper.php';
+
+// Mock WordPress functions
+function wp_get_post_categories($post_id) {
+    return [1];
 }
 
+function get_the_ID() {
+    return 1;
+}
 
-require_once(dirname(__DIR__) . '/app/functions/helper.php');
+function get_category($category_id) {
+    $cat = new stdClass();
+    $cat->term_id = 1;
+    $cat->name = 'Test Category';
+    return $cat;
+}
 
-class test_show_cats extends TestCase
-{
-    public function testShowCatsXss()
-    {
-        $malicious_name = '<script>alert("XSS");</script>';
+function get_tag_link($term_id) {
+    return 'javascript:alert("XSS")';
+}
 
-        // Mock WordPress functions needed for show_cats
-        if (!function_exists('get_the_ID')) {
-            function get_the_ID() {
-                return 1;
-            }
-        }
-        if (!function_exists('wp_get_post_categories')) {
-            function wp_get_post_categories($post_id) {
-                return [1];
-            }
-        }
-        if (!function_exists('get_category')) {
-            function get_category($category_id) {
-                $category = new stdClass();
-                $category->term_id = 1;
-                $category->name = '<script>alert("XSS");</script>';
-                return $category;
-            }
-        }
-        if (!function_exists('get_tag_link')) {
-            function get_tag_link($tag_id) {
-                return 'tag-link';
-            }
-        }
+function esc_url($url) {
+    // A simple mock of the WordPress esc_url function for security testing.
+    // The real function is much more complex, but this covers the javascript protocol.
+    if (strpos(strtolower(trim($url)), 'javascript:') === 0) {
+        return '';
+    }
+    return filter_var($url, FILTER_SANITIZE_URL);
+}
 
-        // Capture output
+function esc_html($text) {
+    return htmlspecialchars($text);
+}
+
+function add_filter() {
+    return;
+}
+
+function do_shortcode($v) {
+    return $v;
+}
+
+function is_rtl() {
+    return false;
+}
+
+function get_query_var($key, $default) {
+    return $default;
+}
+function add_shortcode() {
+    return;
+}
+
+class test_show_cats extends TestCase {
+    public function test_show_cats_is_secure() {
         ob_start();
         show_cats();
         $output = ob_get_clean();
-
-        // Assert that the output does NOT contain the malicious script
-        $this->assertStringNotContainsString($malicious_name, $output);
+        $this->assertStringNotContainsString('javascript:alert("XSS")', $output);
     }
 }
