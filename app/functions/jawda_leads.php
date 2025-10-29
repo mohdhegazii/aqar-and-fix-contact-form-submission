@@ -147,7 +147,7 @@ class Jawda_leads_List_Table extends WP_List_Table
         );
 
         return sprintf('%s %s',
-            $item['name'],
+            esc_html($item['name']),
             $this->row_actions($actions)
         );
     }
