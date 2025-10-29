@@ -236,7 +236,7 @@ class Jawda_leads_List_Table extends WP_List_Table
             } elseif (is_numeric($ids)) {
                 $ids = (int) $ids;
             } else {
-                $ids = ''; // Invalid input
+                $ids = intval($ids);
             }
 
             if (!empty($ids)) {
