@@ -226,16 +226,17 @@ class Jawda_leads_List_Table extends WP_List_Table
     function process_bulk_action()
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'leadstable'; // do not forget about tables prefix
+        $table_name = $wpdb->prefix . 'leadstable';
 
         if ('delete' === $this->current_action()) {
             $ids = isset($_REQUEST['id']) ? $_REQUEST['id'] : array();
             if (is_array($ids)) {
-                // Sanitize all IDs to ensure they are integers before imploding
-                $ids = implode(',', array_map('intval', $ids));
+                $ids = array_map('intval', $ids); // Sanitize all IDs
+                $ids = implode(',', $ids);
+            } elseif (is_numeric($ids)) {
+                $ids = (int) $ids;
             } else {
-                // If it's not an array, it's invalid for a bulk action.
-                $ids = '';
+                $ids = ''; // Invalid input
             }
 
             if (!empty($ids)) {
@@ -327,8 +328,8 @@ function jawda_leads_leads_page_handler()
 
     $message = '';
     if ('delete' === $table->current_action()) {
-      $cnt = isset($_REQUEST['id']) AND is_array($_REQUEST['id']) ? count($_REQUEST['id']) : 0;
-      $message = '<div class="updated below-h2" id="message"><p>' . sprintf(__('Items deleted: %d'), $cnt ) . '</p></div>';
+        $cnt = isset($_REQUEST['id']) && is_array($_REQUEST['id']) ? count(array_map('intval', $_REQUEST['id'])) : 0;
+        $message = '<div class="updated below-h2" id="message"><p>' . sprintf(__('Items deleted: %d'), $cnt) . '</p></div>';
     }
     ?>
 <div class="wrap">
@@ -408,7 +409,7 @@ function jawda_leads_leads_form_page_handler()
         // if this is not post back we load item to edit or give new one to create
         $item = $default;
         if (isset($_REQUEST['id'])) {
-            $item = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $_REQUEST['id']), ARRAY_A);
+            $item = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", (int) $_REQUEST['id']), ARRAY_A);
             if (!$item) {
                 $item = $default;
                 $notice = __('Item not found');

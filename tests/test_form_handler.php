@@ -2,6 +2,7 @@
 
 // Mock WordPress environment
 define('ABSPATH', dirname(__DIR__) . '/');
+define('WP_TESTS_DOMAIN', 'example.org');
 
 // Mock global $wpdb object
 global $wpdb;
@@ -43,6 +44,31 @@ if (!function_exists('wp_send_json_error')) {
         $last_json_response = ['success' => false, 'data' => $data];
     }
 }
+if (!function_exists('wp_verify_nonce')) {
+    function wp_verify_nonce($nonce, $action) {
+        return true;
+    }
+}
+if (!function_exists('wp_die')) {
+    function wp_die($message) {
+        // Don't die, just echo the message for testing purposes
+        global $last_json_response;
+        if (!$last_json_response || !$last_json_response['success']) {
+            echo "wp_die called with message: $message";
+        }
+    }
+}
+if (!function_exists('get_bloginfo')) {
+    function get_bloginfo($show = 'name', $filter = 'raw') {
+        return 'Test Blog';
+    }
+}
+if (!function_exists('wp_redirect')) {
+    function wp_redirect($location, $status = 302) {
+        // Don't redirect, just echo the location for testing purposes
+        echo "wp_redirect called with location: $location";
+    }
+}
 
 
 // Include the function file to be tested
@@ -73,6 +99,7 @@ run_test("Successful Submission", function() {
         'email' => 'test@example.com',
         'special_request' => 'This is a test message.',
         'langu' => 'en',
+        'my_contact_form_nonce' => 'nonce'
     ];
 
     prefix_send_email_to_admin();
@@ -93,6 +120,7 @@ run_test("Missing Required Field", function() {
         'phone' => '', // Missing phone
         'packageid' => 'Test Package',
         'langu' => 'ar',
+        'my_contact_form_nonce' => 'nonce'
     ];
 
     prefix_send_email_to_admin();
@@ -114,6 +142,7 @@ run_test("Invalid Email Format", function() {
         'packageid' => 'Test Package',
         'email' => 'invalid-email',
         'langu' => 'en',
+        'my_contact_form_nonce' => 'nonce'
     ];
 
     prefix_send_email_to_admin();

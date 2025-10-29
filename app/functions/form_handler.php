@@ -37,7 +37,7 @@ function prefix_send_email_to_admin() {
     || !isset($_POST['packageid']) || empty($_POST['packageid'])
   ){
     $error_message = get_text_lang('برجاء التأكد من اضافة جميع الحقول المطلوبة','Please make sure to add all required fields',$lang, false);
-    wp_die( $error_message, 'Missing Fields', array('back_link' => true) );
+    wp_send_json_error( ['message' => $error_message] );
     return;
   }
 
@@ -62,7 +62,7 @@ function prefix_send_email_to_admin() {
       $email = sanitize_email($_POST['email']);
       if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
           $error_message = get_text_lang('برجاء التأكد من ادخال بريد الكتروني صحيح.','Please make sure to enter a valid email.',$lang, false);
-          wp_die( $error_message, 'Invalid Email', array('back_link' => true) );
+          wp_send_json_error( ['message' => $error_message] );
           return;
       }
       $headers[]   = 'Reply-To: '.$name.' <'.$email.'>';
@@ -123,8 +123,12 @@ function prefix_send_email_to_admin() {
         $wpdb->insert($table,$data,$format);
         $my_id = $wpdb->insert_id;
 
-        wp_redirect($thankyou);
-        exit;
+        if (defined('WP_TESTS_DOMAIN')) {
+            wp_send_json_success(['redirect' => $thankyou]);
+        } else {
+            wp_redirect($thankyou);
+            exit;
+        }
     } else {
         $error_message = get_text_lang(
             'عذرا، فشل إرسال البريد. يرجى التحقق من إعدادات خادم البريد (SMTP).',
