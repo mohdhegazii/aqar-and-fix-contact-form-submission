@@ -1,0 +1,1 @@
+{"version":1,"defects":{"xss_test::testXssInColumnName":3,"test_show_cats::testShowCatsXss":3},"times":{"xss_test::testXssInColumnName":0.002,"test_show_cats::testShowCatsXss":0.002,"Test_Jawda_Leads_Injection::test_sql_injection":0.008}}
