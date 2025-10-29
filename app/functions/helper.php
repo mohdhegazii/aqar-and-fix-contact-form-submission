@@ -45,7 +45,7 @@ function show_tags(){
     $separator = '';
     if (!empty($post_tags)) {
         foreach ($post_tags as $tag) {
-            $output .= '<a href="' . get_tag_link($tag->term_id) . '">' . $tag->name . '</a>' . $separator;
+            $output .= '<a href="' . esc_url(get_tag_link($tag->term_id)) . '">' . esc_html($tag->name) . '</a>' . $separator;
         }
         return trim($output, $separator);
     }
