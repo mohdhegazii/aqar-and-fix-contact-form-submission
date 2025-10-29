@@ -28,6 +28,7 @@ if (!function_exists('sanitize_email')) { function sanitize_email($email) { retu
 if (!function_exists('wp_mail')) { function wp_mail($to, $subject, $message, $headers) { return true; } }
 if (!function_exists('check_referrer')) { function check_referrer() {} }
 if (!function_exists('test_input')) { function test_input($data) { return $data; } }
+if (!function_exists('esc_html')) { function esc_html($text) { return htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); } }
 
 // --- Test-specific mocks for AJAX ---
 $last_json_response = null;

@@ -128,7 +128,7 @@ class Jawda_leads_List_Table extends WP_List_Table
      */
     function column_default($item, $column_name)
     {
-        return $item[$column_name];
+        return esc_html($item[$column_name]);
     }
 
 
