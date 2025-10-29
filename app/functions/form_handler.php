@@ -162,7 +162,7 @@ function ja_ajax_search_properties() {
 		'post_type'     => array( 'property' ),
 		'post_status'   => 'publish',
     'posts_per_page' => 10,
-		's'             => sanitize_text_field( stripslashes( $_POST['search'] ) ),
+		's'             => sanitize_text_field( $_POST['search'] ),
 	) );
 
 	$items = array();
@@ -185,7 +185,7 @@ function ja_ajax_search_projects() {
 		'post_type'     => array( 'projects' ),
 		'post_status'   => 'publish',
     'posts_per_page' => 10,
-		's'             => sanitize_text_field( stripslashes( $_POST['search'] ) ),
+		's'             => sanitize_text_field( $_POST['search'] ),
 	) );
 
 	$items = array();
