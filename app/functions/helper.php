@@ -15,7 +15,7 @@ function show_cats(){
   if (!empty($post_cats)) {
       foreach ($post_cats as $c) {
         $cat = get_category( $c );
-        $output .= '<a href="' . get_tag_link($cat->term_id) . '">' . $cat->name . '</a>';
+        $output .= '<a href="' . get_tag_link($cat->term_id) . '">' . esc_html($cat->name) . '</a>';
       }
       $output = trim($output);
   }
