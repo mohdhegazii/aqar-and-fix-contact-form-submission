@@ -83,30 +83,30 @@ function prefix_send_email_to_admin() {
     $message = "
     <html>
     <head>
-    <title>$subject</title>
+    <title>" . esc_html($subject) . "</title>
     </head>
     <body>
-      <h2>$subject</h2>
+      <h2>" . esc_html($subject) . "</h2>
       <table>
         <tr>
           <td><strong>اسم العميل : </strong></td>
-          <td>$name</td>
+          <td>" . esc_html($name) . "</td>
         </tr>
         <tr>
           <td><strong>ايميل العميل : </strong></td>
-          <td>$email</td>
+          <td>" . esc_html($email) . "</td>
         </tr>
         <tr>
           <td><strong>تليفون العميل : </strong></td>
-          <td>$phone</td>
+          <td>" . esc_html($phone) . "</td>
         </tr>
         <tr>
           <td><strong>رسالة العميل : </strong></td>
-          <td>$massege</td>
+          <td>" . esc_html($massege) . "</td>
         </tr>
         <tr>
           <td><strong>اسم المشروع / الإهتمام : </strong></td>
-          <td>$packagename</td>
+          <td>" . esc_html($packagename) . "</td>
         </tr>
       </table>
     </body>
