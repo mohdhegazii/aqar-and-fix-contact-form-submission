@@ -16,7 +16,7 @@ function prefix_send_email_to_admin() {
   // Verify nonce
   if ( ! isset( $_POST['my_contact_form_nonce'] ) || ! wp_verify_nonce( $_POST['my_contact_form_nonce'], 'my_contact_form_action' ) ) {
     $error_message = get_text_lang('عذراً، حدث خطأ ما.','Sorry, something went wrong.',$lang, false);
-    wp_die( $error_message, 'Invalid Nonce', array('back_link' => true) );
+    wp_send_json_error( ['message' => $error_message] );
   }
 
   // Thank you page
@@ -53,7 +53,7 @@ function prefix_send_email_to_admin() {
 
     if ( $bHasLink ) {
         $error_message = get_text_lang('غير مسموح بإضافة روابط في الرسالة.','It is not allowed to add links in the message.',$lang, false);
-        wp_die( $error_message, 'Links Not Allowed', array('back_link' => true) );
+        wp_send_json_error( ['message' => $error_message] );
         return;
     }
 
@@ -73,7 +73,7 @@ function prefix_send_email_to_admin() {
     // Check Phone
     if( strlen($phone) < 11 || strlen($phone) > 17 ){
         $error_message = get_text_lang('برجاء التأكد من ادخال رقم هاتف صحيح.','Please make sure to enter a valid phone number.',$lang, false);
-        wp_die( $error_message, 'Invalid Phone', array('back_link' => true) );
+        wp_send_json_error( ['message' => $error_message] );
         return;
     }
 
@@ -136,7 +136,7 @@ function prefix_send_email_to_admin() {
             $lang,
             false
         );
-        wp_die( $error_message, 'Mail Error', array('back_link' => true) );
+        wp_send_json_error( ['message' => $error_message] );
     }
 }
 add_action( 'admin_post_nopriv_my_contact_form', 'prefix_send_email_to_admin' );
