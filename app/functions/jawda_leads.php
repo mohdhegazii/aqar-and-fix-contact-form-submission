@@ -471,7 +471,7 @@ function jawda_leads_leads_form_meta_box_handler($item)
             <label for="name"><?php _e('Name')?></label>
         </th>
         <td>
-            <input id="name" name="name" type="text" style="width: 95%" value="<?php echo esc_attr($item['name'])?>"
+    <input id="name" name="name" type="text" style="width: 95%" value="<?php echo esc_attr($item['name']); ?>"
                    size="50" class="code" placeholder="<?php _e('Your name')?>" required>
         </td>
     </tr>
@@ -480,7 +480,7 @@ function jawda_leads_leads_form_meta_box_handler($item)
             <label for="email"><?php _e('E-Mail')?></label>
         </th>
         <td>
-            <input id="email" name="email" type="email" style="width: 95%" value="<?php echo esc_attr($item['email'])?>"
+            <input id="email" name="email" type="email" style="width: 95%" value="<?php echo esc_attr($item['email']); ?>"
                    size="50" class="code" placeholder="<?php _e('Your E-Mail')?>" required>
         </td>
     </tr>
@@ -490,7 +490,7 @@ function jawda_leads_leads_form_meta_box_handler($item)
             <label for="phone"><?php _e('phone')?></label>
         </th>
         <td>
-            <input id="phone" name="phone" type="text" style="width: 95%" value="<?php echo esc_attr($item['phone'])?>"
+            <input id="phone" name="phone" type="text" style="width: 95%" value="<?php echo esc_attr($item['phone']); ?>"
                    size="50" class="code" placeholder="<?php _e('Your phone')?>" required>
         </td>
     </tr>
@@ -500,7 +500,7 @@ function jawda_leads_leads_form_meta_box_handler($item)
             <label for="massege"><?php _e('massege')?></label>
         </th>
         <td>
-            <input id="massege" name="massege" type="text" style="width: 95%" value="<?php echo esc_attr($item['massege'])?>"
+            <input id="massege" name="massege" type="text" style="width: 95%" value="<?php echo esc_attr($item['massege']); ?>"
                    size="50" class="code" placeholder="<?php _e('Your massege')?>" required>
         </td>
     </tr>
@@ -510,7 +510,7 @@ function jawda_leads_leads_form_meta_box_handler($item)
             <label for="packagename"><?php _e('packagename')?></label>
         </th>
         <td>
-            <input id="packagename" name="packagename" type="text" style="width: 95%" value="<?php echo esc_attr($item['packagename'])?>"
+            <input id="packagename" name="packagename" type="text" style="width: 95%" value="<?php echo esc_attr($item['packagename']); ?>"
                    size="50" class="code" placeholder="<?php _e('Your packagename')?>" required>
         </td>
     </tr>
