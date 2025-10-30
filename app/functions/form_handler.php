@@ -25,7 +25,31 @@ function prefix_send_email_to_admin() {
 
 
   // Site Email
-  $email_to = get_bloginfo('admin_email');
+  $email_to = '';
+  if ( function_exists( 'carbon_get_theme_option' ) ) {
+    $email_to = carbon_get_theme_option( 'jawda_email' );
+
+    if ( empty( $email_to ) ) {
+      $email_to = carbon_get_theme_option( '_jawda_email' );
+    }
+  }
+
+  if ( empty( $email_to ) ) {
+    $email_to = get_bloginfo( 'admin_email' );
+  }
+
+  $email_to = sanitize_email( $email_to );
+
+  if ( empty( $email_to ) || ! filter_var( $email_to, FILTER_VALIDATE_EMAIL ) ) {
+    $error_message = get_text_lang(
+      'عذراً، لم يتم ضبط بريد الاستقبال بشكل صحيح. برجاء مراجعة الإعدادات.',
+      'Sorry, the recipient email address is not configured correctly. Please review the settings.',
+      $lang,
+      false
+    );
+    wp_send_json_error( [ 'message' => $error_message ] );
+    return;
+  }
 
   // Check Inputs
   foreach ($_POST as $key => $postval) { $_POST[$key] = test_input($postval); }
@@ -57,7 +81,7 @@ function prefix_send_email_to_admin() {
         return;
     }
 
-    $headers = [];
+    $headers = [ 'From: AqarAnd <wordpress@aqarand.com>' ];
     if( isset($_POST['email']) && $_POST['email'] != '' ){
       $email = sanitize_email($_POST['email']);
       if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {

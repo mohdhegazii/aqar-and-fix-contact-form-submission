@@ -22,10 +22,30 @@ $wpdb = new class {
 if (!function_exists('add_action')) { function add_action($tag, $function_to_add) {} }
 if (!function_exists('add_filter')) { function add_filter($tag, $function_to_add) {} }
 if (!function_exists('get_page_link')) { function get_page_link($page_id) { return 'http://example.com/thank-you'; } }
-if (!function_exists('carbon_get_theme_option')) { function carbon_get_theme_option($option_name) { return 'admin@example.com'; } }
+if (!function_exists('carbon_get_theme_option')) {
+    function carbon_get_theme_option($option_name) {
+        if (in_array($option_name, ['jawda_email', '_jawda_email'], true)) {
+            return 'options@example.com';
+        }
+
+        if (strpos($option_name, 'jawda_page_thankyou_') === 0) {
+            return 123;
+        }
+
+        return 'admin@example.com';
+    }
+}
 if (!function_exists('sanitize_text_field')) { function sanitize_text_field($str) { return $str; } }
 if (!function_exists('sanitize_email')) { function sanitize_email($email) { return $email; } }
-if (!function_exists('wp_mail')) { function wp_mail($to, $subject, $message, $headers) { return true; } }
+global $last_mail_args;
+$last_mail_args = null;
+if (!function_exists('wp_mail')) {
+    function wp_mail($to, $subject, $message, $headers) {
+        global $last_mail_args;
+        $last_mail_args = compact('to', 'subject', 'message', 'headers');
+        return true;
+    }
+}
 if (!function_exists('check_referrer')) { function check_referrer() {} }
 if (!function_exists('test_input')) { function test_input($data) { return $data; } }
 if (!function_exists('esc_html')) { function esc_html($text) { return htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); } }
@@ -78,10 +98,11 @@ require_once ABSPATH . 'app/functions/form_handler.php';
 // --- Test Runner ---
 
 function run_test($name, $test_function) {
-    global $last_json_response, $wpdb;
+    global $last_json_response, $wpdb, $last_mail_args;
     // Reset state before each test
     $last_json_response = null;
     $wpdb->insert_calls = [];
+    $last_mail_args = null;
 
     echo "Running test: $name... ";
     $test_function();
@@ -152,6 +173,47 @@ run_test("Invalid Email Format", function() {
         echo "PASS";
     } else {
         echo "FAIL\n";
+        print_r($last_json_response);
+    }
+});
+
+// Test 4: Email is sent to Carbon Fields option with correct headers
+run_test("Uses Carbon email and headers", function() {
+    global $last_json_response, $last_mail_args;
+
+    $_POST = [
+        'name' => 'Header Test',
+        'phone' => '12345678901',
+        'packageid' => 'Header Package',
+        'email' => 'sender@example.com',
+        'langu' => 'en',
+        'my_contact_form_nonce' => 'nonce'
+    ];
+
+    $last_mail_args = null;
+    prefix_send_email_to_admin();
+
+    $has_reply_to = false;
+    if (isset($last_mail_args['headers']) && is_array($last_mail_args['headers'])) {
+        foreach ($last_mail_args['headers'] as $header) {
+            if (stripos($header, 'Reply-To:') === 0 && strpos($header, 'sender@example.com') !== false) {
+                $has_reply_to = true;
+                break;
+            }
+        }
+    }
+
+    if (
+        $last_mail_args &&
+        $last_mail_args['to'] === 'options@example.com' &&
+        in_array('From: AqarAnd <wordpress@aqarand.com>', $last_mail_args['headers'], true) &&
+        $has_reply_to &&
+        $last_json_response && $last_json_response['success'] === true
+    ) {
+        echo "PASS";
+    } else {
+        echo "FAIL\n";
+        var_dump($last_mail_args);
         print_r($last_json_response);
     }
 });
