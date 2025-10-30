@@ -16,6 +16,10 @@ function sanitize_text_field($str) {
     return $str; // Pass through for this test
 }
 
+function check_ajax_referer($action, $query_arg) {
+    // Mocked to always pass for this test
+}
+
 class WP_Query {
     public $posts = [];
     public function __construct($args) {
