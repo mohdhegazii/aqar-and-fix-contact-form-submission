@@ -15,7 +15,7 @@ function show_cats(){
   if (!empty($post_cats)) {
       foreach ($post_cats as $c) {
         $cat = get_category( $c );
-        $output .= '<a href="' . esc_url(get_tag_link($cat->term_id)) . '">' . esc_html($cat->name) . '</a>';
+        $output .= '<a href="' . esc_url(get_category_link($cat->term_id)) . '">' . esc_html($cat->name) . '</a>';
       }
       $output = trim($output);
   }
@@ -29,7 +29,7 @@ function breadcrumbs_cat(){
   $post_cats = wp_get_post_categories( get_the_ID() );
   if (!empty($post_cats)) {
     $cat = get_category( $post_cats[0] );
-    $link = get_tag_link($cat->term_id);
+    $link = get_category_link($cat->term_id);
     $name = $cat->name;
   }
   return ["link" => $link,"name" => $name];
