@@ -39,7 +39,9 @@ function get_my_styles(){
 
 function get_my_scripts(){
   $ldir = is_rtl() ? "rtl" : "ltr" ;
+  $search_nonce = wp_create_nonce('search_nonce_action');
   echo '<script>var global = {"ajax":'.json_encode( admin_url( "admin-ajax.php" ) ).'};</script>'."\n";
+  echo '<script>var search_nonce = {"nonce":"'.$search_nonce.'"}</script>';
   echo '<script src="'.get_template_directory_uri().'/assets/js/'.$ldir.'/script.js?v=01"></script>'."\n";
   echo '<script src="'.wjsurl.'main.js?v=1.0"></script>'."\n";
 }
