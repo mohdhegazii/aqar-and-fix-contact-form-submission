@@ -157,6 +157,7 @@ function get_text_lang($st1, $st2, $lang, $echo = true){
 
 
 function ja_ajax_search_properties() {
+    check_ajax_referer( 'search_nonce_action', 'security' );
 
 	$results = new WP_Query( array(
 		'post_type'     => array( 'property' ),
@@ -180,6 +181,7 @@ add_action( 'wp_ajax_nopriv_search_properties', 'ja_ajax_search_properties' );
 
 
 function ja_ajax_search_projects() {
+    check_ajax_referer( 'search_nonce_action', 'security' );
 
 	$results = new WP_Query( array(
 		'post_type'     => array( 'projects' ),
