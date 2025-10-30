@@ -81,10 +81,10 @@ function prefix_send_email_to_admin() {
     // package id
     $packagename = sanitize_text_field($_POST['packageid']);
 
-    $name = sanitize_text_field(stripslashes(trim($_POST['name'])));
-    $phone = sanitize_text_field(stripslashes(trim($_POST['phone'])));
+    $name = sanitize_text_field(trim($_POST['name']));
+    $phone = sanitize_text_field(trim($_POST['phone']));
 
-    $massege = ( isset($_POST['special_request']) AND $_POST['special_request'] != '' ) ? sanitize_text_field(stripslashes(trim($_POST['special_request']))) : 'لم يتم اضافة رسالة';
+    $massege = ( isset($_POST['special_request']) AND $_POST['special_request'] != '' ) ? sanitize_text_field(trim($_POST['special_request'])) : 'لم يتم اضافة رسالة';
 
     $bHasLink = strpos($massege, 'http') !== false || strpos($massege, 'www.') !== false;
 
