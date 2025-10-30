@@ -141,6 +141,8 @@ function prefix_send_email_to_admin() {
 }
 add_action( 'admin_post_nopriv_my_contact_form', 'prefix_send_email_to_admin' );
 add_action( 'admin_post_my_contact_form', 'prefix_send_email_to_admin' );
+add_action( 'wp_ajax_my_contact_form', 'prefix_send_email_to_admin' );
+add_action( 'wp_ajax_nopriv_my_contact_form', 'prefix_send_email_to_admin' );
 
 
 
