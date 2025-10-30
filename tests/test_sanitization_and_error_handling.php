@@ -28,6 +28,9 @@ if (!function_exists('add_action')) {
 if (!function_exists('carbon_get_theme_option')) {
     function carbon_get_theme_option($option_name) { return 'admin@example.com'; }
 }
+if (!function_exists('sanitize_email')) {
+    function sanitize_email($email) { return $email; }
+}
 if (!function_exists('get_page_link')) {
     function get_page_link($page_id) { return 'http://example.com/thank-you'; }
 }

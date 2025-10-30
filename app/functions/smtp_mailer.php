@@ -2,6 +2,12 @@
 
 add_action( 'phpmailer_init', 'crb_configure_smtp' );
 function crb_configure_smtp( $phpmailer ) {
+    global $aqarand_force_secondary_smtp;
+
+    if ( empty( $aqarand_force_secondary_smtp ) ) {
+        return;
+    }
+
     // Get the saved SMTP settings
     $host       = carbon_get_theme_option( 'crb_smtp_host' );
     $port       = carbon_get_theme_option( 'crb_smtp_port' );
