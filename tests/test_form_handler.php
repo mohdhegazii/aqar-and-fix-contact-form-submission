@@ -32,17 +32,37 @@ if (!function_exists('carbon_get_theme_option')) {
             return 123;
         }
 
+        $smtp_defaults = [
+            'crb_smtp_host'     => 'smtp.example.com',
+            'crb_smtp_port'     => '587',
+            'crb_smtp_username' => 'smtp-user@example.com',
+            'crb_smtp_password' => 'app-password',
+        ];
+
+        if (array_key_exists($option_name, $smtp_defaults)) {
+            return $smtp_defaults[$option_name];
+        }
+
         return 'admin@example.com';
     }
 }
 if (!function_exists('sanitize_text_field')) { function sanitize_text_field($str) { return $str; } }
 if (!function_exists('sanitize_email')) { function sanitize_email($email) { return $email; } }
-global $last_mail_args;
+global $last_mail_args, $last_mail_args_history, $wp_mail_return_values;
 $last_mail_args = null;
+$last_mail_args_history = [];
+$wp_mail_return_values = [];
 if (!function_exists('wp_mail')) {
     function wp_mail($to, $subject, $message, $headers) {
-        global $last_mail_args;
-        $last_mail_args = compact('to', 'subject', 'message', 'headers');
+        global $last_mail_args, $last_mail_args_history, $wp_mail_return_values;
+        $args = compact('to', 'subject', 'message', 'headers');
+        $last_mail_args = $args;
+        $last_mail_args_history[] = $args;
+
+        if (!empty($wp_mail_return_values)) {
+            return array_shift($wp_mail_return_values);
+        }
+
         return true;
     }
 }
@@ -98,11 +118,14 @@ require_once ABSPATH . 'app/functions/form_handler.php';
 // --- Test Runner ---
 
 function run_test($name, $test_function) {
-    global $last_json_response, $wpdb, $last_mail_args;
+    global $last_json_response, $wpdb, $last_mail_args, $last_mail_args_history, $wp_mail_return_values, $aqarand_force_secondary_smtp;
     // Reset state before each test
     $last_json_response = null;
     $wpdb->insert_calls = [];
     $last_mail_args = null;
+    $last_mail_args_history = [];
+    $wp_mail_return_values = [];
+    $aqarand_force_secondary_smtp = false;
 
     echo "Running test: $name... ";
     $test_function();
@@ -214,6 +237,35 @@ run_test("Uses Carbon email and headers", function() {
     } else {
         echo "FAIL\n";
         var_dump($last_mail_args);
+        print_r($last_json_response);
+    }
+});
+
+// Test 5: Fallback to secondary SMTP when the first attempt fails
+run_test("Fallback to secondary SMTP", function() {
+    global $last_json_response, $last_mail_args_history, $wp_mail_return_values;
+
+    $_POST = [
+        'name' => 'Fallback Test',
+        'phone' => '12345678901',
+        'packageid' => 'Fallback Package',
+        'email' => 'fallback@example.com',
+        'langu' => 'en',
+        'my_contact_form_nonce' => 'nonce'
+    ];
+
+    $wp_mail_return_values = [false, true];
+
+    prefix_send_email_to_admin();
+
+    $two_attempts = count($last_mail_args_history) === 2;
+    $success_redirect = $last_json_response && $last_json_response['success'] === true;
+
+    if ($two_attempts && $success_redirect) {
+        echo "PASS";
+    } else {
+        echo "FAIL\n";
+        var_dump($last_mail_args_history);
         print_r($last_json_response);
     }
 });

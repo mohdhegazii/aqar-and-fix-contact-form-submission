@@ -7,6 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) {	die( 'Invalid request.' ); }
 function set_mail_content_type(){ return "text/html"; }
 add_filter( 'wp_mail_content_type','set_mail_content_type' );
 
+// Track whether we should force the secondary SMTP configuration.
+global $aqarand_force_secondary_smtp;
+if ( ! isset( $aqarand_force_secondary_smtp ) ) {
+  $aqarand_force_secondary_smtp = false;
+}
+
 
 function prefix_send_email_to_admin() {
 
@@ -137,9 +143,26 @@ function prefix_send_email_to_admin() {
     </html>
     ";
 
+    global $aqarand_force_secondary_smtp;
+
+    $aqarand_force_secondary_smtp = false;
     $send_mail = wp_mail($email_to, $subject, $message, $headers);
 
-    if( $send_mail !== false ){
+    if ( false === $send_mail ) {
+        if ( aqarand_can_use_secondary_smtp() ) {
+            $aqarand_force_secondary_smtp = true;
+            $send_mail = wp_mail($email_to, $subject, $message, $headers);
+            $aqarand_force_secondary_smtp = false;
+
+            if ( ! $send_mail ) {
+                error_log('[Mail Error] Secondary SMTP fallback failed.');
+            }
+        } else {
+            error_log('[Mail Error] Secondary SMTP settings incomplete. Fallback not attempted.');
+        }
+    }
+
+    if( $send_mail ){
         global $wpdb;
         $table = $wpdb->prefix.'leadstable';
         $data = array('name' => $name,'email' => $email,'phone' => $phone,'massege' => $massege,'packagename' => $packagename);
@@ -165,6 +188,19 @@ function prefix_send_email_to_admin() {
 }
 add_action( 'admin_post_nopriv_my_contact_form', 'prefix_send_email_to_admin' );
 add_action( 'admin_post_my_contact_form', 'prefix_send_email_to_admin' );
+
+function aqarand_can_use_secondary_smtp() {
+  if ( ! function_exists( 'carbon_get_theme_option' ) ) {
+    return false;
+  }
+
+  $host     = carbon_get_theme_option( 'crb_smtp_host' );
+  $port     = carbon_get_theme_option( 'crb_smtp_port' );
+  $username = carbon_get_theme_option( 'crb_smtp_username' );
+  $password = carbon_get_theme_option( 'crb_smtp_password' );
+
+  return ! empty( $host ) && ! empty( $port ) && ! empty( $username ) && ! empty( $password );
+}
 
 
 
