@@ -69,7 +69,7 @@ $is_type = ( isset($parameters['type']) && trim($parameters['type']) !== '' ) ? 
 $title = ( is_rtl() ) ? 'نتائج البحث ' : 'Search Results ';
 if( $is_text ){
   $title .= ( is_rtl() ) ? 'عن' : 'for';
-  $title .= " '".$parameters['s']."' ";
+  $title .= " '".esc_html($parameters['s'])."' ";
 }
 if( $is_city ){
   $city_term = get_term( $parameters['city'] );
