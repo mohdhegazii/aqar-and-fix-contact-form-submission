@@ -18,11 +18,21 @@ function prefix_send_email_to_admin() {
 
   // Language
   $lang = ( isset($_POST['langu']) && $_POST['langu'] == 'ar' ) ? 'ar' : 'en';
+  $is_ajax = ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) || defined( 'WP_TESTS_DOMAIN' );
+
+  $send_error = function( $message ) use ( $is_ajax ) {
+    if ( $is_ajax ) {
+      wp_send_json_error( [ 'message' => $message ] );
+    } else {
+      wp_die( $message );
+    }
+  };
 
   // Verify nonce
   if ( ! isset( $_POST['my_contact_form_nonce'] ) || ! wp_verify_nonce( $_POST['my_contact_form_nonce'], 'my_contact_form_action' ) ) {
     $error_message = get_text_lang('عذراً، حدث خطأ ما.','Sorry, something went wrong.',$lang, false);
-    wp_send_json_error( ['message' => $error_message] );
+    $send_error( $error_message );
+    return;
   }
 
   // Thank you page
@@ -53,7 +63,7 @@ function prefix_send_email_to_admin() {
       $lang,
       false
     );
-    wp_send_json_error( [ 'message' => $error_message ] );
+    $send_error( $error_message );
     return;
   }
 
@@ -67,7 +77,7 @@ function prefix_send_email_to_admin() {
     || !isset($_POST['packageid']) || empty($_POST['packageid'])
   ){
     $error_message = get_text_lang('برجاء التأكد من اضافة جميع الحقول المطلوبة','Please make sure to add all required fields',$lang, false);
-    wp_send_json_error( ['message' => $error_message] );
+    $send_error( $error_message );
     return;
   }
 
@@ -83,7 +93,7 @@ function prefix_send_email_to_admin() {
 
     if ( $bHasLink ) {
         $error_message = get_text_lang('غير مسموح بإضافة روابط في الرسالة.','It is not allowed to add links in the message.',$lang, false);
-        wp_send_json_error( ['message' => $error_message] );
+        $send_error( $error_message );
         return;
     }
 
@@ -92,7 +102,7 @@ function prefix_send_email_to_admin() {
       $email = sanitize_email($_POST['email']);
       if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
           $error_message = get_text_lang('برجاء التأكد من ادخال بريد الكتروني صحيح.','Please make sure to enter a valid email.',$lang, false);
-          wp_send_json_error( ['message' => $error_message] );
+          $send_error( $error_message );
           return;
       }
       $headers[]   = 'Reply-To: '.$name.' <'.$email.'>';
@@ -103,7 +113,7 @@ function prefix_send_email_to_admin() {
     // Check Phone
     if( strlen($phone) < 11 || strlen($phone) > 17 ){
         $error_message = get_text_lang('برجاء التأكد من ادخال رقم هاتف صحيح.','Please make sure to enter a valid phone number.',$lang, false);
-        wp_send_json_error( ['message' => $error_message] );
+        $send_error( $error_message );
         return;
     }
 
@@ -170,12 +180,13 @@ function prefix_send_email_to_admin() {
         $wpdb->insert($table,$data,$format);
         $my_id = $wpdb->insert_id;
 
-        if (defined('WP_TESTS_DOMAIN')) {
+        if ( $is_ajax ) {
             wp_send_json_success(['redirect' => $thankyou]);
-        } else {
-            wp_redirect($thankyou);
-            exit;
+            return;
         }
+
+        wp_redirect($thankyou);
+        exit;
     } else {
         $error_message = get_text_lang(
             'عذرا، فشل إرسال البريد. يرجى التحقق من إعدادات خادم البريد (SMTP).',
@@ -183,11 +194,13 @@ function prefix_send_email_to_admin() {
             $lang,
             false
         );
-        wp_send_json_error( ['message' => $error_message] );
+        $send_error( $error_message );
     }
 }
 add_action( 'admin_post_nopriv_my_contact_form', 'prefix_send_email_to_admin' );
 add_action( 'admin_post_my_contact_form', 'prefix_send_email_to_admin' );
+add_action( 'wp_ajax_nopriv_my_contact_form', 'prefix_send_email_to_admin' );
+add_action( 'wp_ajax_my_contact_form', 'prefix_send_email_to_admin' );
 
 function aqarand_can_use_secondary_smtp() {
   if ( ! function_exists( 'carbon_get_theme_option' ) ) {
