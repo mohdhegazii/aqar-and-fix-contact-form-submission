@@ -81,7 +81,7 @@ function prefix_send_email_to_admin() {
     // package id
     $packagename = sanitize_text_field($_POST['packageid']);
 
-    $name = wp_strip_all_tags(trim($_POST['name']));
+    $name = str_replace( [ "\r", "\n" ], [ '', '' ], wp_strip_all_tags( trim( $_POST['name'] ) ) );
     $phone = wp_strip_all_tags(trim($_POST['phone']));
 
     $massege = ( isset($_POST['special_request']) AND $_POST['special_request'] != '' ) ? wp_strip_all_tags(trim($_POST['special_request'])) : 'لم يتم اضافة رسالة';
