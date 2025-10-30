@@ -67,9 +67,6 @@ function prefix_send_email_to_admin() {
     return;
   }
 
-  // Check Inputs
-  foreach ($_POST as $key => $postval) { $_POST[$key] = test_input($postval); }
-
   // Check Required Data
   if(
     !isset($_POST['name']) || empty($_POST['name'])
@@ -84,10 +81,10 @@ function prefix_send_email_to_admin() {
     // package id
     $packagename = sanitize_text_field($_POST['packageid']);
 
-    $name = sanitize_text_field($_POST['name']);
-    $phone = sanitize_text_field($_POST['phone']);
+    $name = sanitize_text_field(stripslashes(trim($_POST['name'])));
+    $phone = sanitize_text_field(stripslashes(trim($_POST['phone'])));
 
-    $massege = ( isset($_POST['special_request']) AND $_POST['special_request'] != '' ) ? sanitize_text_field($_POST['special_request']) : 'لم يتم اضافة رسالة';
+    $massege = ( isset($_POST['special_request']) AND $_POST['special_request'] != '' ) ? sanitize_text_field(stripslashes(trim($_POST['special_request']))) : 'لم يتم اضافة رسالة';
 
     $bHasLink = strpos($massege, 'http') !== false || strpos($massege, 'www.') !== false;
 
