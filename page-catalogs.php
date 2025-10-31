@@ -31,22 +31,16 @@ wp_reset_postdata();
       <div class="container">
     		<div class="row">
             <?php
-         if ( get_query_var('paged') ) {
-             $paged = get_query_var('paged');
-         } elseif ( get_query_var('page') ) { // 'page' is used instead of 'paged' on Static Front Page
-             $paged = get_query_var('page');
-         } else {
-             $paged = 1;
-         }
-         $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-         $loop = new WP_Query(
+         $paged = max( 1, (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) );
+         $loop  = new WP_Query(
              array(
-                 'post_type' => 'catalogs',
-                 'posts_per_page' => get_option('posts_per_page'),
-                 'paged' => $paged,
-                 'post_status' => 'publish',
-                 'orderby' => 'date', // modified | title | name | ID | rand
-                 'order' => 'DESC'
+                 'post_type'      => 'catalogs',
+                 'posts_per_page' => 9,
+                 'paged'          => $paged,
+                 'post_status'    => 'publish',
+                 'orderby'        => 'date', // modified | title | name | ID | rand
+                 'order'          => 'DESC',
+                 'no_found_rows'  => false,
              )
          );
        ?>
@@ -64,10 +58,10 @@ wp_reset_postdata();
                $wp_query = $loop;
                $big = 999999999;
                echo paginate_links(array(
-                   'base' => str_replace($big, '%#%', get_pagenum_link($big)),
-                   'format' => '?paged=%#%',
-                   'current' => max(1, get_query_var('paged')),
-                   'total' => $wp_query->max_num_pages
+                   'base'    => str_replace($big, '%#%', esc_url( get_pagenum_link($big) ) ),
+                   'format'  => '',
+                   'current' => $paged,
+                   'total'   => (int) $wp_query->max_num_pages,
                ));
                $wp_query = $orig_query; // fix for pagination to work
              ?>

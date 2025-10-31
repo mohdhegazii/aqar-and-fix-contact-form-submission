@@ -131,3 +131,219 @@ function custom_project_rewrite_rules($rewrite_rules) {
     return $new_rules + $rewrite_rules;
 }
 add_filter('rewrite_rules_array', 'custom_project_rewrite_rules');
+
+/* -----------------------------------------------------------------------------
+# Pagination helpers
+----------------------------------------------------------------------------- */
+
+if ( ! function_exists( 'aqarand_get_current_paged' ) ) {
+    /**
+     * Retrieve the current paged value while supporting static front pages.
+     */
+    function aqarand_get_current_paged() {
+        return max( 1, (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) );
+    }
+}
+
+if ( ! function_exists( 'aqarand_get_english_ordinal' ) ) {
+    /**
+     * Convert a number to its English ordinal representation.
+     */
+    function aqarand_get_english_ordinal( $number ) {
+        $number = (int) $number;
+
+        if ( $number % 100 >= 11 && $number % 100 <= 13 ) {
+            return $number . 'th page';
+        }
+
+        switch ( $number % 10 ) {
+            case 1:
+                return $number . 'st page';
+            case 2:
+                return $number . 'nd page';
+            case 3:
+                return $number . 'rd page';
+            default:
+                return $number . 'th page';
+        }
+    }
+}
+
+if ( ! function_exists( 'aqarand_get_arabic_page_label' ) ) {
+    /**
+     * Get the Arabic translation for the current page number label.
+     */
+    function aqarand_get_arabic_page_label( $number ) {
+        $number = (int) $number;
+
+        $map = array(
+            2  => 'الصفحة الثانية',
+            3  => 'الصفحة الثالثة',
+            4  => 'الصفحة الرابعة',
+            5  => 'الصفحة الخامسة',
+            6  => 'الصفحة السادسة',
+            7  => 'الصفحة السابعة',
+            8  => 'الصفحة الثامنة',
+            9  => 'الصفحة التاسعة',
+            10 => 'الصفحة العاشرة',
+        );
+
+        if ( isset( $map[ $number ] ) ) {
+            return $map[ $number ];
+        }
+
+        if ( $number > 1 ) {
+            return 'الصفحة رقم ' . $number;
+        }
+
+        return '';
+    }
+}
+
+if ( ! function_exists( 'aqarand_get_page_suffix' ) ) {
+    /**
+     * Build the multilingual suffix that should be appended to meta values.
+     */
+    function aqarand_get_page_suffix( $number ) {
+        $number = (int) $number;
+
+        if ( $number <= 1 ) {
+            return '';
+        }
+
+        $arabic  = aqarand_get_arabic_page_label( $number );
+        $english = aqarand_get_english_ordinal( $number );
+
+        if ( ! $arabic && ! $english ) {
+            return '';
+        }
+
+        if ( ! $arabic ) {
+            return $english;
+        }
+
+        if ( ! $english ) {
+            return $arabic;
+        }
+
+        return $arabic . ' | ' . $english;
+    }
+}
+
+if ( ! function_exists( 'aqarand_append_suffix_to_string' ) ) {
+    /**
+     * Append suffix text to a string while avoiding duplication.
+     */
+    function aqarand_append_suffix_to_string( $text, $suffix ) {
+        if ( '' === $suffix ) {
+            return $text;
+        }
+
+        if ( false !== strpos( $text, $suffix ) ) {
+            return $text;
+        }
+
+        if ( '' !== $text ) {
+            return $text . ' — ' . $suffix;
+        }
+
+        return $suffix;
+    }
+}
+
+if ( ! function_exists( 'aqarand_generate_base_description' ) ) {
+    /**
+     * Generate a fallback description based on the current query context.
+     */
+    function aqarand_generate_base_description() {
+        $description = trim( wp_strip_all_tags( get_the_archive_description() ) );
+
+        if ( '' === $description && is_singular() ) {
+            $post_id = get_queried_object_id();
+            if ( $post_id ) {
+                $excerpt = get_post_field( 'post_excerpt', $post_id );
+                if ( ! $excerpt ) {
+                    $excerpt = get_post_field( 'post_content', $post_id );
+                }
+                $description = wp_trim_words( wp_strip_all_tags( $excerpt ), 30, '…' );
+            }
+        }
+
+        if ( '' === $description ) {
+            $description = get_bloginfo( 'description', 'display' );
+        }
+
+        return trim( wp_strip_all_tags( $description ) );
+    }
+}
+
+if ( ! function_exists( 'aqarand_filter_document_title' ) ) {
+    /**
+     * Append the page suffix to the document title when needed.
+     */
+    function aqarand_filter_document_title( $title ) {
+        $paged = aqarand_get_current_paged();
+        $suffix = aqarand_get_page_suffix( $paged );
+
+        if ( '' === $suffix ) {
+            return $title;
+        }
+
+        return aqarand_append_suffix_to_string( $title, $suffix );
+    }
+    add_filter( 'pre_get_document_title', 'aqarand_filter_document_title', 50 );
+}
+
+if ( ! function_exists( 'aqarand_filter_meta_description' ) ) {
+    /**
+     * Append the page suffix to SEO plugin meta descriptions.
+     */
+    function aqarand_filter_meta_description( $description ) {
+        $paged = aqarand_get_current_paged();
+        $suffix = aqarand_get_page_suffix( $paged );
+
+        if ( '' === $suffix ) {
+            return $description;
+        }
+
+        if ( '' === trim( $description ) ) {
+            $description = aqarand_generate_base_description();
+        }
+
+        return aqarand_append_suffix_to_string( $description, $suffix );
+    }
+
+    add_filter( 'wpseo_metadesc', 'aqarand_filter_meta_description', 50 );
+    add_filter( 'rank_math/frontend/description', 'aqarand_filter_meta_description', 50 );
+}
+
+if ( ! function_exists( 'aqarand_output_meta_description_suffix' ) ) {
+    /**
+     * Output a fallback meta description with suffix when no SEO plugin handles it.
+     */
+    function aqarand_output_meta_description_suffix() {
+        if ( defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+            return;
+        }
+
+        $paged = aqarand_get_current_paged();
+        $suffix = aqarand_get_page_suffix( $paged );
+
+        if ( '' === $suffix ) {
+            return;
+        }
+
+        $description = aqarand_generate_base_description();
+        if ( '' === $description ) {
+            return;
+        }
+
+        $description = aqarand_append_suffix_to_string( $description, $suffix );
+
+        if ( '' !== $description ) {
+            echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
+        }
+    }
+
+    add_action( 'wp_head', 'aqarand_output_meta_description_suffix', 90 );
+}
