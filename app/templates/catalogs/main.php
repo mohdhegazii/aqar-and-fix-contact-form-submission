@@ -94,25 +94,8 @@ function get_my_catalogs_main()
 
         <?php
 
-        if( $catalog_type === 1 ) {
-
-          $args = get_catalog_projects($project_city,$project_type,$project_price_from,$project_price_to);
+          $args = get_unified_catalog_args( $catalog_id );
           $the_query = new WP_Query( $args );
-
-        }
-        if( $catalog_type === 2 ) {
-
-          $args = get_catalog_properties($property_city,$property_type,$jawda_property_main_project);
-
-          /*
-          echo "<pre>";
-          var_dump($args);
-          die();
-          */
-
-          $the_query = new WP_Query( $args );
-
-        }
 
         ?>
 
@@ -121,9 +104,9 @@ function get_my_catalogs_main()
         if ( $the_query->have_posts() ) :
           while ( $the_query->have_posts() ) : $the_query->the_post(); ?>
           <div class="col-md-4 projectbxspace">
-            <?php if ( $catalog_type === 1 ): ?>
+            <?php if ( get_post_type() === 'projects' ): ?>
               <?php get_my_project_box(get_the_ID()); ?>
-            <?php elseif( $catalog_type === 2 ): ?>
+            <?php elseif( get_post_type() === 'property' ): ?>
               <?php get_my_property_box(get_the_ID()); ?>
             <?php endif; ?>
           </div>
@@ -159,45 +142,63 @@ function get_my_catalogs_main()
 }
 
 
+function get_unified_catalog_args( $catalog_id ) {
+    $catalog_type = carbon_get_post_meta( $catalog_id, 'jawda_catalog_type' );
+
+    $args = [
+        'post_type'      => ['projects', 'property'],
+        'posts_per_page' => -1,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'post_status'    => 'publish',
+		'suppress_filters' => false,
+		'no_found_rows'  => true,
+    ];
+
+    $tax_query = ['relation' => 'AND'];
+    $meta_query = ['relation' => 'AND'];
+
+    if ( $catalog_type === 1 ) { // Projects
+        $project_city = carbon_get_post_meta( $catalog_id, 'jawda_project_city' );
+        $project_type = carbon_get_post_meta( $catalog_id, 'jawda_project_type' );
+        $project_price_from = carbon_get_post_meta( $catalog_id, 'jawda_project_price_from' );
+        $project_price_to = carbon_get_post_meta( $catalog_id, 'jawda_project_price_to' );
+
+        if ( is_numeric($project_city) && $project_city != '0' ) {
+            $tax_query[] = ['taxonomy' => 'projects_area', 'field' => 'term_id', 'terms' => $project_city];
+        }
+        if ( is_numeric($project_type) && $project_type != '0' ) {
+            $tax_query[] = ['taxonomy' => 'projects_type', 'field' => 'term_id', 'terms' => $project_type];
+        }
+        if ( ! empty($project_price_from) && ! empty($project_price_to) ) {
+            $meta_query[] = ['key' => 'jawda_price', 'value' => [$project_price_from, $project_price_to], 'type' => 'numeric', 'compare' => 'BETWEEN'];
+        }
+
+    } elseif ( $catalog_type === 2 ) { // Properties
+        $property_city = carbon_get_post_meta( $catalog_id, 'jawda_property_city' );
+        $property_type = carbon_get_post_meta( $catalog_id, 'jawda_property_type' );
+        $property_main_project_raw = carbon_get_post_meta( $catalog_id, 'jawda_property_main_project' );
+        $property_main_project = !empty($property_main_project_raw[0]) ? $property_main_project_raw[0] : null;
 
 
-function get_catalog_projects($city,$type,$price_from,$price_to)
-{
+        if ( is_numeric($property_city) && $property_city != '0' ) {
+            $tax_query[] = ['taxonomy' => 'property_city', 'field' => 'term_id', 'terms' => $property_city];
+        }
+        if ( is_numeric($property_type) && $property_type != '0' ) {
+            $tax_query[] = ['taxonomy' => 'property_type', 'field' => 'term_id', 'terms' => $property_type];
+        }
+        if ( !empty($property_main_project) ) {
+            $meta_query[] = ['key' => 'jawda_project', 'value' => $property_main_project];
+        }
+    }
 
-  $return = [];
-  $return['post_type'] = ['projects'];
-  $return['posts_per_page'] = 36; 
-  $return['orderby'] = 'rand';
-  $return['tax_query']['relation'] = 'AND';
-  if ( is_numeric($city) && $city != '0' ) {
-  $return['tax_query'][] = ['taxonomy' => 'projects_area','field' => 'term_id','terms' => $city];
-  }
-  if ( is_numeric($type) && $type != '0' ) {
-  $return['tax_query'][] = ['taxonomy' => 'projects_type','field' => 'term_id','terms' => $type];
-  }
-  $return['meta_query'][] = ['key' => 'jawda_price','value' => [$price_from,$price_to],'type' => 'numeric','compare' => 'BETWEEN'];
-  return $return;
-}
+    if ( count( $tax_query ) > 1 ) {
+        $args['tax_query'] = $tax_query;
+    }
 
-function get_catalog_properties($city,$type,$project)
-{
+    if ( count( $meta_query ) > 1 ) {
+        $args['meta_query'] = $meta_query;
+    }
 
-  $return = [];
-
-  $return['post_type'] = 'property';
-  $return['posts_per_page'] = 30;
-  $return['orderby'] = 'rand';
-  if ( is_numeric($city) AND is_numeric($type) ) {
-    $return['tax_query']['relation'] = 'AND';
-  }
-  if ( is_numeric($city) && $city != '0' ) {
-    $return['tax_query'][] = ['taxonomy' => 'property_city','field' => 'term_id','terms' => $city];
-  }
-  if ( is_numeric($type) && $type != '0' ) {
-    $return['tax_query'][] = ['taxonomy' => 'property_type','field' => 'term_id','terms' => $type];
-  }
-  if ( !empty($project) ) {
-    $return['meta_query'][] = ['key' => 'jawda_project','value' => $project];
-  }
-  return $return;
+    return $args;
 }
