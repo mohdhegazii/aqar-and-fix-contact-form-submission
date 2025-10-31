@@ -108,7 +108,24 @@ function prefix_send_email_to_admin() {
     }
 
     // Check Phone
-    if( strlen($phone) < 11 || strlen($phone) > 17 ){
+    $is_valid_phone = false;
+    // Match Egyptian mobile numbers: 010, 011, 012, 015 followed by 8 digits.
+    if ( preg_match( '/^01[0125]\d{8}$/', $phone ) ) {
+        $is_valid_phone = true;
+    } else {
+        // For international numbers, remove leading +, then check if all digits and length is reasonable.
+        $clean_phone = ltrim($phone, '+');
+        if ( ctype_digit( $clean_phone ) && strlen( $clean_phone ) >= 11 && strlen( $clean_phone ) <= 17 ) {
+             // A final check to reject local-like numbers that aren't valid Egyptian mobile numbers
+            if (strlen($clean_phone) == 11 && substr($clean_phone, 0, 2) === '02') {
+                $is_valid_phone = false;
+            } else {
+                $is_valid_phone = true;
+            }
+        }
+    }
+
+    if ( ! $is_valid_phone ) {
         $error_message = get_text_lang('برجاء التأكد من ادخال رقم هاتف صحيح.','Please make sure to enter a valid phone number.',$lang, false);
         $send_error( $error_message );
         return;
