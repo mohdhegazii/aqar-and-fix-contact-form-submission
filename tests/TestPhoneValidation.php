@@ -94,6 +94,7 @@ if (!run_test("Rejects overly long number", "12345678901234567890123", false)) $
 if (!run_test("Accepts valid Egyptian number", "01012345678", true)) $all_tests_passed = false;
 if (!run_test("Accepts valid international number with +", "+201012345678", true)) $all_tests_passed = false;
 if (!run_test("Accepts valid Egyptian landline", "02123456789", true)) $all_tests_passed = false;
+if (!run_test("Rejects invalid Egyptian-style number", "01312345678", false)) $all_tests_passed = false;
 
 
 // --- Final Report ---
