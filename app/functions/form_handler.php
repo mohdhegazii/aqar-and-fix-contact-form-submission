@@ -116,8 +116,11 @@ function prefix_send_email_to_admin() {
         // For international numbers, remove leading +, then check if all digits and length is reasonable.
         $clean_phone = ltrim($phone, '+');
         if ( ctype_digit( $clean_phone ) && strlen( $clean_phone ) >= 11 && strlen( $clean_phone ) <= 17 ) {
-             // A final check to reject local-like numbers that aren't valid Egyptian mobile numbers
-            $is_valid_phone = true;
+            if ( strlen( $clean_phone ) === 11 && substr( $clean_phone, 0, 2 ) === '01' ) {
+                $is_valid_phone = false;
+            } else {
+                $is_valid_phone = true;
+            }
         }
     }
 
