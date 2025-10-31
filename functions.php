@@ -144,12 +144,27 @@ if ( ! function_exists( 'aqarand_get_current_paged' ) ) {
         global $paged, $page;
 
         $candidates = array(
-            (int) $paged,
-            (int) $page,
-            (int) get_query_var( 'paged' ),
-            (int) get_query_var( 'page' ),
-            1,
+            isset( $paged ) ? $paged : 0,
+            isset( $page ) ? $page : 0,
+            get_query_var( 'paged' ),
+            get_query_var( 'page' ),
         );
+
+        if ( isset( $_GET['paged'] ) ) {
+            $candidates[] = wp_unslash( $_GET['paged'] );
+        }
+
+        if ( isset( $_GET['page'] ) ) {
+            $candidates[] = wp_unslash( $_GET['page'] );
+        }
+
+        $candidates = array_map( 'absint', array_filter( $candidates ) );
+
+        if ( empty( $candidates ) ) {
+            return 1;
+        }
+
+        $candidates[] = 1;
 
         return max( $candidates );
     }
