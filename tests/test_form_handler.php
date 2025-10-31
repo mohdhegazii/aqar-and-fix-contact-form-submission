@@ -47,6 +47,7 @@ if (!function_exists('carbon_get_theme_option')) {
     }
 }
 if (!function_exists('sanitize_text_field')) { function sanitize_text_field($str) { return $str; } }
+if (!function_exists('wp_strip_all_tags')) { function wp_strip_all_tags($str) { return $str; } }
 if (!function_exists('sanitize_email')) { function sanitize_email($email) { return $email; } }
 global $last_mail_args, $last_mail_args_history, $wp_mail_return_values;
 $last_mail_args = null;
