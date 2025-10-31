@@ -71,7 +71,7 @@ function prefix_send_email_to_admin() {
   if(
     !isset($_POST['name']) || empty($_POST['name'])
     || !isset($_POST['phone']) || empty($_POST['phone'])
-    || !isset($_POST['packageid']) || empty($_POST['packageid'])
+    || !isset($_POST['packageid']) || $_POST['packageid'] === ''
   ){
     $error_message = get_text_lang('برجاء التأكد من اضافة جميع الحقول المطلوبة','Please make sure to add all required fields',$lang, false);
     $send_error( $error_message );
