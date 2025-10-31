@@ -141,7 +141,17 @@ if ( ! function_exists( 'aqarand_get_current_paged' ) ) {
      * Retrieve the current paged value while supporting static front pages.
      */
     function aqarand_get_current_paged() {
-        return max( 1, (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) );
+        global $paged, $page;
+
+        $candidates = array(
+            (int) $paged,
+            (int) $page,
+            (int) get_query_var( 'paged' ),
+            (int) get_query_var( 'page' ),
+            1,
+        );
+
+        return max( $candidates );
     }
 }
 

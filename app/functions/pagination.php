@@ -15,7 +15,11 @@ if (!function_exists('theme_pagination')) {
         return;
     }
 
-    $paged = get_query_var('paged') ? absint(get_query_var('paged')) : 1;
+    if ( function_exists( 'aqarand_get_current_paged' ) ) {
+        $paged = absint( aqarand_get_current_paged() );
+    } else {
+        $paged = get_query_var('paged') ? absint(get_query_var('paged')) : 1;
+    }
     $max   = intval($wp_query->max_num_pages);
 
     $links = [];

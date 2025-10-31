@@ -625,5 +625,9 @@ function jawda_title_text($atts = []) {
 
 function jawda_pagination_page()
 {
+  if ( function_exists( 'aqarand_get_current_paged' ) ) {
+    return aqarand_get_current_paged();
+  }
+
   return get_query_var( 'paged', 1 );
 }
