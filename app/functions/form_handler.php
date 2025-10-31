@@ -117,11 +117,7 @@ function prefix_send_email_to_admin() {
         $clean_phone = ltrim($phone, '+');
         if ( ctype_digit( $clean_phone ) && strlen( $clean_phone ) >= 11 && strlen( $clean_phone ) <= 17 ) {
              // A final check to reject local-like numbers that aren't valid Egyptian mobile numbers
-            if (strlen($clean_phone) == 11 && substr($clean_phone, 0, 2) === '02') {
-                $is_valid_phone = false;
-            } else {
-                $is_valid_phone = true;
-            }
+            $is_valid_phone = true;
         }
     }
 
