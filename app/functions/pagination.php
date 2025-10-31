@@ -5,55 +5,119 @@
 ----------------------------------------------------------------------------- */
 
 if (!function_exists('theme_pagination')) {
-  function theme_pagination() {
-    if (is_singular()) {
-        return;
+  function theme_pagination($args = []) {
+    $force        = false;
+    $current_page = null;
+    $total_pages  = null;
+    $custom_query = null;
+
+    if (is_bool($args)) {
+        $force = $args;
+        $args  = [];
+    }
+
+    if (is_array($args)) {
+        if (isset($args['force'])) {
+            $force = (bool) $args['force'];
+            unset($args['force']);
+        }
+
+        if (isset($args['current'])) {
+            $current_page = absint($args['current']);
+            unset($args['current']);
+        }
+
+        if (isset($args['total'])) {
+            $total_pages = (int) $args['total'];
+            unset($args['total']);
+        }
+
+        if (isset($args['query']) && $args['query'] instanceof WP_Query) {
+            $custom_query = $args['query'];
+            unset($args['query']);
+        }
     }
 
     global $wp_query;
-    if ($wp_query->max_num_pages <= 1) {
+
+    $active_query = $custom_query instanceof WP_Query ? $custom_query : $wp_query;
+
+    if (!$force && is_singular()) {
         return;
     }
 
-    if ( function_exists( 'aqarand_get_current_paged' ) ) {
-        $paged = absint( aqarand_get_current_paged() );
-    } else {
-        $paged = get_query_var('paged') ? absint(get_query_var('paged')) : 1;
+    if (!$active_query instanceof WP_Query) {
+        return;
     }
-    $max   = intval($wp_query->max_num_pages);
+
+    if (null === $total_pages) {
+        $total_pages = (int) $active_query->max_num_pages;
+    }
+
+    if ($total_pages <= 1) {
+        return;
+    }
+
+    if (null === $current_page) {
+        if (function_exists('aqarand_get_current_paged')) {
+            $current_page = absint(aqarand_get_current_paged());
+        } else {
+            $paged_var   = absint(get_query_var('paged'));
+            $page_var    = absint(get_query_var('page'));
+            $current_page = max(1, $paged_var, $page_var);
+        }
+    }
+
+    if ($current_page < 1) {
+        $current_page = 1;
+    }
+
+    $current_page = min($current_page, $total_pages);
+
+    $original_query = null;
+
+    if ($custom_query instanceof WP_Query) {
+        $original_query = $wp_query;
+        $wp_query       = $custom_query;
+        $GLOBALS['wp_query'] = $custom_query;
+    }
 
     $links = [];
-    $show_ellipsis = true;
 
-    // Add nearby links
-    for ($i = 1; $i <= $max; $i++) {
-        if ($i == 1 || $i == $max || ($i >= $paged - 1 && $i <= $paged + 1)) {
+    for ($i = 1; $i <= $total_pages; $i++) {
+        if ($i === 1 || $i === $total_pages || ($i >= $current_page - 1 && $i <= $current_page + 1)) {
             $links[] = $i;
         }
     }
 
     echo '<div class="navigation"><ul>';
 
-    if (get_previous_posts_link()) {
-        printf('<li class="prev">%s</li>', get_previous_posts_link());
+    $previous_link = get_previous_posts_link(is_rtl() ? 'السابق' : __('« Previous', 'aqarand'));
+    if ($previous_link) {
+        printf('<li class="prev">%s</li>', $previous_link);
     }
 
-    // Loop through pages
     $current_link = 0;
     foreach ($links as $link) {
         if ($current_link + 1 < $link) {
             echo '<li>…</li>';
         }
 
-        $class = ($paged == $link) ? ' class="active"' : '';
+        $class = ($current_page === $link) ? ' class="active"' : '';
         printf('<li%s><a href="%s">%s</a></li>', $class, esc_url(get_pagenum_link($link)), $link);
         $current_link = $link;
     }
 
-    if (get_next_posts_link()) {
-        printf('<li class="next">%s</li>', get_next_posts_link());
+    $next_link = get_next_posts_link(is_rtl() ? 'التالي' : __('Next »', 'aqarand'), $total_pages);
+    if ($next_link) {
+        printf('<li class="next">%s</li>', $next_link);
     }
 
     echo '</ul></div>';
+
+    if ($original_query instanceof WP_Query) {
+        $wp_query = $original_query;
+        $GLOBALS['wp_query'] = $original_query;
+    }
   }
 }

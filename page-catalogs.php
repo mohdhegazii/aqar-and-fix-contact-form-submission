@@ -32,17 +32,13 @@ wp_reset_postdata();
     		<div class="row">
             <?php
          $current_page = function_exists( 'aqarand_get_current_paged' ) ? aqarand_get_current_paged() : 1;
-         $current_page = max( 1, (int) $current_page );
+         $current_page = max( 1, absint( $current_page ) );
 
-         $main_query_paged = get_query_var( 'paged' );
-         $main_query_page  = get_query_var( 'page' );
-
-         $loop  = new WP_Query(
+         $loop = new WP_Query(
              array(
                  'post_type'           => 'catalogs',
                  'posts_per_page'      => 9,
                  'paged'               => $current_page,
-                 'page'                => $current_page,
                  'post_status'         => 'publish',
                  'orderby'             => 'date', // modified | title | name | ID | rand
                  'order'               => 'DESC',
@@ -58,67 +54,51 @@ wp_reset_postdata();
             <?php endwhile; ?>
             <?php if ($loop->max_num_pages > 1) : // custom pagination  ?>
          <div class="col-md-12 center">
-           <div class="blognavigation">
-            <?php
-             global $wp_query, $paged, $page;
-               $orig_query = $wp_query; // fix for pagination to work
-               $orig_paged = isset( $paged ) ? $paged : null;
-               $orig_page  = isset( $page ) ? $page : null;
-               $wp_query   = $loop;
+           <?php
+             $pagination_markup = '';
+             $pagination_page   = max( 1, min( $current_page, (int) $loop->max_num_pages ) );
 
-               $current = max( 1, min( $current_page, (int) $loop->max_num_pages ) );
+             if ( function_exists( 'theme_pagination' ) ) {
+                 ob_start();
+                 theme_pagination(
+                     array(
+                         'force'   => true,
+                         'query'   => $loop,
+                         'current' => $pagination_page,
+                         'total'   => (int) $loop->max_num_pages,
+                     )
+                 );
+                 $pagination_markup = trim( ob_get_clean() );
+             }
 
-               $paged = $current;
-               $page  = $current;
-               set_query_var( 'paged', $current );
-               set_query_var( 'page', $current );
+             if ( '' === $pagination_markup ) {
+                 $fallback_links = paginate_links(
+                     array(
+                         'current'   => $pagination_page,
+                         'total'     => (int) $loop->max_num_pages,
+                         'mid_size'  => 1,
+                         'end_size'  => 1,
+                         'prev_text' => is_rtl() ? 'السابق' : __( '« Previous', 'aqarand' ),
+                         'next_text' => is_rtl() ? 'التالي' : __( 'Next »', 'aqarand' ),
+                         'type'      => 'array',
+                     )
+                 );
 
-               $pagination = '';
+                 if ( ! empty( $fallback_links ) ) {
+                     $pagination_markup = '<div class="navigation"><ul>';
 
-               if ( function_exists( 'theme_pagination' ) ) {
-                   ob_start();
-                   theme_pagination();
-                   $pagination = trim( ob_get_clean() );
-               }
+                     foreach ( $fallback_links as $link ) {
+                         $pagination_markup .= '<li>' . $link . '</li>';
+                     }
 
-               if ( '' === $pagination ) {
-                   $big     = 999999999;
-                   $format  = get_option( 'permalink_structure' ) ? 'page/%#%/' : '&paged=%#%';
-                   $pagination = paginate_links(array(
-                       'base'      => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
-                       'format'    => $format,
-                       'current'   => $current,
-                       'total'     => (int) $loop->max_num_pages,
-                       'mid_size'  => 2,
-                       'end_size'  => 1,
-                       'prev_text' => is_rtl() ? 'السابق' : '« Previous',
-                       'next_text' => is_rtl() ? 'التالي' : 'Next »',
-                       'type'      => 'plain',
-                   ));
-               }
+                     $pagination_markup .= '</ul></div>';
+                 }
+             }
 
-               $wp_query = $orig_query; // fix for pagination to work
-
-               if ( null !== $orig_paged ) {
-                   $paged = $orig_paged;
-               } else {
-                   unset( $paged );
-               }
-
-               if ( null !== $orig_page ) {
-                   $page = $orig_page;
-               } else {
-                   unset( $page );
-               }
-
-               set_query_var( 'paged', $main_query_paged );
-               set_query_var( 'page', $main_query_page );
-
-               if ( $pagination ) {
-                   echo $pagination; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output generated by theme_pagination()/paginate_links().
-               }
-            ?>
-          </div>
+             if ( $pagination_markup ) {
+                 echo '<div class="blognavigation">' . $pagination_markup . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Contains sanitized pagination markup.
+             }
+           ?>
         </div>
       <?php endif; endif; wp_reset_postdata(); ?>
     		</div>
