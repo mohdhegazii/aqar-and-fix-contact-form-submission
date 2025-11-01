@@ -12,8 +12,10 @@ function get_my_catalogs_main()
 {
 
   ob_start();
+  $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
   $lang = is_rtl() ? 'ar' : 'en';
   $catalog_id = get_the_ID();
+  $catalog_permalink = get_permalink($catalog_id);
   $title = get_the_title($catalog_id);
   $catalog_type = carbon_get_post_meta( $catalog_id, 'jawda_catalog_type' );
   $project_city = carbon_get_post_meta( $catalog_id, 'jawda_project_city' );
@@ -94,7 +96,7 @@ function get_my_catalogs_main()
 
         <?php
 
-          $args = get_unified_catalog_args( $catalog_id );
+          $args = get_unified_catalog_args( $catalog_id, $paged );
           $the_query = new WP_Query( $args );
 
         ?>
@@ -113,6 +115,27 @@ function get_my_catalogs_main()
           <?php endwhile; ?>
        <?php  endif;
         ?>
+
+        <?php if ($the_query->max_num_pages > 1) : ?>
+          <div class="col-md-12 center">
+            <div class="blognavigation">
+              <?php
+              $base = rtrim($catalog_permalink, '/') . '/page/%#%/';
+              echo paginate_links([
+                'base'      => $base,
+                'format'    => '',
+                'current'   => $paged,
+                'total'     => (int) $the_query->max_num_pages,
+                'mid_size'  => 2,
+                'end_size'  => 1,
+                'prev_text' => __('« Previous'),
+                'next_text' => __('Next »'),
+                'type'      => 'list',
+              ]);
+              ?>
+            </div>
+          </div>
+        <?php endif; ?>
 
         <?php wp_reset_postdata(); ?>
       </div>
@@ -142,17 +165,18 @@ function get_my_catalogs_main()
 }
 
 
-function get_unified_catalog_args( $catalog_id ) {
+function get_unified_catalog_args( $catalog_id, $paged = 1 ) {
     $catalog_type = carbon_get_post_meta( $catalog_id, 'jawda_catalog_type' );
 
     $args = [
         'post_type'      => ['projects', 'property'],
-        'posts_per_page' => -1,
+        'posts_per_page' => 9,
+        'paged'          => $paged,
         'orderby'        => 'date',
         'order'          => 'DESC',
         'post_status'    => 'publish',
 		'suppress_filters' => false,
-		'no_found_rows'  => true,
+		'no_found_rows'  => false,
     ];
 
     $tax_query = ['relation' => 'AND'];
