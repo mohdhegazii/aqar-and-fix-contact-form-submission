@@ -130,7 +130,7 @@ function get_my_catalogs_main()
                 'end_size'  => 1,
                 'prev_text' => __('« Previous'),
                 'next_text' => __('Next »'),
-                'type'      => 'list',
+                'type'      => 'plain',
               ]);
               ?>
             </div>
