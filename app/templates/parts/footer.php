@@ -38,21 +38,27 @@ function get_my_footer(){
 	<div class="imp-links">
 		<div class="container">
 			<div class="row">
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<div class="link-box">
 						<div class="imp-title"><?php get_text('أحدث المشروعات','Latest Projects'); ?></div>
             <?php if ( has_nav_menu( 'important_links_1' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_1', 'menu_class' => 'quick-links' ) ); } ?>
 					</div>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
+					<div class="link-box">
+						<div class="imp-title"><?php get_text('افضل المشروعات','Best Projects'); ?></div>
+            <?php if ( has_nav_menu( 'important_links_4' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_4', 'menu_class' => 'quick-links' ) ); } ?>
+					</div>
+				</div>
+				<div class="col-md-3">
 					<div class="link-box">
 						<div class="imp-title"><?php get_text('أشهر المناطق','Most popular regions'); ?></div>
             <?php if ( has_nav_menu( 'important_links_2' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_2', 'menu_class' => 'quick-links' ) ); } ?>
 					</div>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<div class="link-box">
-						<div class="imp-title"><?php get_text('أشهر المطورين','Most Popular Developers'); ?></div>
+						<div class="imp-title"><?php get_text('افضل المطورين','Best Developers'); ?></div>
             <?php if ( has_nav_menu( 'important_links_3' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_3', 'menu_class' => 'quick-links' ) ); } ?>
 					</div>
 				</div>
