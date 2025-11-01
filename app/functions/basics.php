@@ -299,3 +299,20 @@ add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
   }
   return $redirect_url;
 }, 10, 2 );
+
+/* -----------------------------------------------------------------------------
+# Ensure correct Open Graph image for catalogs
+----------------------------------------------------------------------------- */
+
+function custom_og_image_for_catalogs( $image ) {
+  if ( is_singular('catalogs') && has_post_thumbnail() ) {
+    $featured_image_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
+    if ( $featured_image_url ) {
+      return $featured_image_url;
+    }
+  }
+  return $image;
+}
+
+add_filter( 'wpseo_opengraph_image', 'custom_og_image_for_catalogs', 10, 1 );
+add_filter( 'rank_math/opengraph/image_source', 'custom_og_image_for_catalogs', 10, 1 );
