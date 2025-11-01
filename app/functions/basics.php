@@ -287,11 +287,10 @@ add_action( 'init', function () {
 }, 20);
 
 add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
-  if ( is_singular('catalog') ) {
-    $paged = get_query_var('paged');
-    if ( $paged && $paged > 1 ) {
-      return false; // keep /page/N/
-    }
+  // This more robust check looks for the exact URL structure we need.
+  // It prevents the redirect for paginated catalog pages like /catalog/slug/page/2/
+  if ( preg_match( '/\/catalog\/[^\/]+\/page\/[0-9]+/', $requested_url ) ) {
+    return false;
   }
   return $redirect_url;
 }, 10, 2 );
