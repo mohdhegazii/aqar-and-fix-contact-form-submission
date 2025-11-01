@@ -47,6 +47,25 @@ function get_my_scripts(){
   echo '<script src="'.wjsurl.'main.js?v=1.0"></script>'."\n";
 }
 
+function enqueue_footer_toggle_script() {
+    wp_enqueue_script(
+        'custom-footer-toggle',
+        get_template_directory_uri() . '/assets/js/custom-footer.js',
+        array(),
+        '1.0',
+        true
+    );
+
+    wp_localize_script(
+        'custom-footer-toggle',
+        'footer_toggle_vars',
+        array(
+            'show_more' => get_text( 'المزيد', 'Show More' ),
+            'show_less' => get_text( 'أقل', 'Show Less' ),
+        )
+    );
+}
+add_action( 'wp_enqueue_scripts', 'enqueue_footer_toggle_script' );
 
 /* -----------------  ------------------ */
 

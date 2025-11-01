@@ -38,21 +38,58 @@ function get_my_footer(){
 	<div class="imp-links">
 		<div class="container">
 			<div class="row">
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<div class="link-box">
 						<div class="imp-title"><?php get_text('أحدث المشروعات','Latest Projects'); ?></div>
-            <?php if ( has_nav_menu( 'important_links_1' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_1', 'menu_class' => 'quick-links' ) ); } ?>
+						<?php
+						$args = array(
+							'post_type'      => 'projects',
+							'posts_per_page' => 15,
+							'post_status'    => 'publish',
+							'orderby'        => 'date',
+							'order'          => 'DESC',
+						);
+						$latest_projects_query = new WP_Query( $args );
+						if ( $latest_projects_query->have_posts() ) {
+							echo '<ul class="quick-links initial-links">';
+							$count = 0;
+							$more_links = '';
+							while ( $latest_projects_query->have_posts() ) {
+								$latest_projects_query->the_post();
+								$link = '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a></li>';
+								if ( $count < 5 ) {
+									echo $link;
+								} else {
+									$more_links .= $link;
+								}
+								$count++;
+							}
+							echo '</ul>';
+
+							if ( ! empty( $more_links ) ) {
+								echo '<ul class="quick-links more-links" style="display: none;">' . $more_links . '</ul>';
+								echo '<button class="more-less-button">' . esc_html( get_text( 'المزيد', 'Show More' ) ) . '</button>';
+							}
+						}
+						wp_reset_postdata();
+						?>
 					</div>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
+					<div class="link-box">
+						<div class="imp-title"><?php get_text('أفضل المشروعات','Best Projects'); ?></div>
+            <?php if ( has_nav_menu( 'important_links_4' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_4', 'menu_class' => 'quick-links' ) ); } ?>
+					</div>
+				</div>
+				<div class="col-md-3">
 					<div class="link-box">
 						<div class="imp-title"><?php get_text('أشهر المناطق','Most popular regions'); ?></div>
             <?php if ( has_nav_menu( 'important_links_2' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_2', 'menu_class' => 'quick-links' ) ); } ?>
 					</div>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<div class="link-box">
-						<div class="imp-title"><?php get_text('أشهر المطورين','Most Popular Developers'); ?></div>
+						<div class="imp-title"><?php get_text('أفضل المطورين','Best Developers'); ?></div>
             <?php if ( has_nav_menu( 'important_links_3' ) ) { wp_nav_menu( array( 'container'=> false, 'theme_location' => 'important_links_3', 'menu_class' => 'quick-links' ) ); } ?>
 					</div>
 				</div>
