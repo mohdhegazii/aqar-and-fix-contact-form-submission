@@ -62,7 +62,7 @@ function get_my_catalogs_main()
   <div class="unit-hero">
 		<div class="container">
 			<div class="row">
-				<div class="col-md-8">
+				<div class="col-md-12">
 					<div class="unit-info">
 						<!--Breadcrumbs-->
             <div class="breadcrumbs" itemscope="" itemtype="http://schema.org/BreadcrumbList">
@@ -83,9 +83,6 @@ function get_my_catalogs_main()
 						<h1 class="project-headline"><?php echo esc_html( $title ); ?></h1>
 					</div>
 				</div>
-        <div class="col-md-4">
-        <?php echo '<img class="hero-photo" src="' . esc_url($thumbnail_url) . '" alt="'.esc_attr($title).'" width="500" height="350">'; ?>
-        </div>
 			</div>
 		</div>
 	</div>
