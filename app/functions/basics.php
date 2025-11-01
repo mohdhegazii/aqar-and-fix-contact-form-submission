@@ -210,3 +210,88 @@ function my_robots_func( $robotsstr ) {
   }
   return $robotsstr;
 }
+
+/* -----------------------------------------------------------------------------
+# SEO improvements for paginated pages
+----------------------------------------------------------------------------- */
+
+function eng_ordinal( $n ) {
+  $n = (int) $n;
+  if ( $n % 100 >= 11 && $n % 100 <= 13 ) return $n . 'th';
+  switch ( $n % 10 ) {
+    case 1:  return $n . 'st';
+    case 2:  return $n . 'nd';
+    case 3:  return $n . 'rd';
+    default: return $n . 'th';
+  }
+}
+function ar_page_word( $n ) {
+  $map = [2=>'الثانية',3=>'الثالثة',4=>'الرابعة',5=>'الخامسة',6=>'السادسة',7=>'السابعة',8=>'الثامنة',9=>'التاسعة',10=>'العاشرة'];
+  return isset($map[$n]) ? 'الصفحة ' . $map[$n] : ('الصفحة رقم ' . (int)$n);
+}
+function page_suffix( $n ) {
+  return ' — ' . ar_page_word($n) . ' | ' . eng_ordinal($n) . ' page';
+}
+
+add_filter( 'pre_get_document_title', function( $title ) {
+  $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
+  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+    $title .= page_suffix( $paged );
+  }
+  return $title;
+}, 50);
+
+add_filter( 'wpseo_title', function( $title ) {
+  $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
+  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+    $title .= page_suffix( $paged );
+  }
+  return $title;
+}, 50);
+
+add_filter( 'wpseo_metadesc', function( $desc ) {
+  $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
+  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+    $desc .= page_suffix( $paged );
+  }
+  return $desc;
+}, 50);
+
+add_filter( 'rank_math/frontend/title', function( $title ) {
+  $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
+  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+    $title .= page_suffix( $paged );
+  }
+  return $title;
+}, 50);
+
+add_filter( 'rank_math/frontend/description', function( $desc ) {
+  $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
+  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+    $desc .= page_suffix( $paged );
+  }
+  return $desc;
+}, 50);
+
+/* -----------------------------------------------------------------------------
+# Add rewrite rules for singular CPT pagination
+----------------------------------------------------------------------------- */
+
+add_action( 'init', function () {
+  // The CPT slug is 'catalogs' based on the template file single-catalogs.php
+  $cpt_slug = 'catalogs';
+  add_rewrite_rule(
+    "{$cpt_slug}/([^/]+)/page/([0-9]+)/?$",
+    "index.php?post_type={$cpt_slug}&name=\$matches[1]&paged=\$matches[2]",
+    'top'
+  );
+}, 20);
+
+add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
+  // This more robust check looks for the exact URL structure we need.
+  // It prevents the redirect for paginated catalog pages like /catalog/slug/page/2/
+  if ( preg_match( '/\/catalog\/[^\/]+\/page\/[0-9]+/', $requested_url ) ) {
+    return false;
+  }
+  return $redirect_url;
+}, 10, 2 );
