@@ -34,9 +34,9 @@ function get_my_project_box($project_id){
           echo '<span class="project-developer"><i class="icon-building"></i>' . esc_html($developer_name) . '</span>';
       }
       ?>
-      <a href="<?php echo $url; ?>" class="project-price"><?php get_text('اسعار تبدأ من','Prices starting from'); ?>
+      <div><a href="<?php echo $url; ?>" class="project-price"><?php get_text('اسعار تبدأ من','Prices starting from'); ?>
         <span><?php echo number_format( intval($price) ); ?> <?php get_text('ج.م','EGP'); ?></span>
-      </a>
+      </a></div>
     </div>
     <a href="<?php echo $url; ?>" class="related-btn" aria-label="details"><i class="icon-left-big"></i></a>
   </div>

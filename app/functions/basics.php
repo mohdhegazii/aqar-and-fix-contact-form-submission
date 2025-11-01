@@ -230,7 +230,11 @@ function ar_page_word( $n ) {
   return isset($map[$n]) ? 'الصفحة ' . $map[$n] : ('الصفحة رقم ' . (int)$n);
 }
 function page_suffix( $n ) {
-  return ' — ' . ar_page_word($n) . ' | ' . eng_ordinal($n) . ' page';
+  if ( is_rtl() ) {
+    return ' — ' . ar_page_word($n);
+  } else {
+    return ' — ' . eng_ordinal($n) . ' page';
+  }
 }
 
 add_filter( 'pre_get_document_title', function( $title ) {
