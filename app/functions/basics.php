@@ -278,10 +278,11 @@ add_filter( 'rank_math/frontend/description', function( $desc ) {
 ----------------------------------------------------------------------------- */
 
 add_action( 'init', function () {
-  $cpt = 'catalog'; // replace if your slug differs
+  // The CPT slug is 'catalogs' based on the template file single-catalogs.php
+  $cpt_slug = 'catalogs';
   add_rewrite_rule(
-    "{$cpt}/([^/]+)/page/([0-9]+)/?$",
-    "index.php?{$cpt}=\$matches[1]&paged=\$matches[2]",
+    "{$cpt_slug}/([^/]+)/page/([0-9]+)/?$",
+    "index.php?post_type={$cpt_slug}&name=\$matches[1]&paged=\$matches[2]",
     'top'
   );
 }, 20);
