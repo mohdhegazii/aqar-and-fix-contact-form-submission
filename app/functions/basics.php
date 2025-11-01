@@ -230,12 +230,16 @@ function ar_page_word( $n ) {
   return isset($map[$n]) ? 'الصفحة ' . $map[$n] : ('الصفحة رقم ' . (int)$n);
 }
 function page_suffix( $n ) {
-  return ' — ' . ar_page_word($n) . ' | ' . eng_ordinal($n) . ' page';
+  if ( is_rtl() ) {
+    return ' — ' . ar_page_word($n);
+  } else {
+    return ' — ' . eng_ordinal($n) . ' page';
+  }
 }
 
 add_filter( 'pre_get_document_title', function( $title ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $title .= page_suffix( $paged );
   }
   return $title;
@@ -243,7 +247,7 @@ add_filter( 'pre_get_document_title', function( $title ) {
 
 add_filter( 'wpseo_title', function( $title ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $title .= page_suffix( $paged );
   }
   return $title;
@@ -251,7 +255,7 @@ add_filter( 'wpseo_title', function( $title ) {
 
 add_filter( 'wpseo_metadesc', function( $desc ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $desc .= page_suffix( $paged );
   }
   return $desc;
@@ -259,7 +263,7 @@ add_filter( 'wpseo_metadesc', function( $desc ) {
 
 add_filter( 'rank_math/frontend/title', function( $title ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $title .= page_suffix( $paged );
   }
   return $title;
@@ -267,7 +271,7 @@ add_filter( 'rank_math/frontend/title', function( $title ) {
 
 add_filter( 'rank_math/frontend/description', function( $desc ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $desc .= page_suffix( $paged );
   }
   return $desc;
@@ -295,3 +299,20 @@ add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
   }
   return $redirect_url;
 }, 10, 2 );
+
+/* -----------------------------------------------------------------------------
+# Ensure correct Open Graph image for catalogs
+----------------------------------------------------------------------------- */
+
+function custom_og_image_for_catalogs( $image ) {
+  if ( is_singular('catalogs') && has_post_thumbnail() ) {
+    $featured_image_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
+    if ( $featured_image_url ) {
+      return $featured_image_url;
+    }
+  }
+  return $image;
+}
+
+add_filter( 'wpseo_opengraph_image', 'custom_og_image_for_catalogs', 10, 1 );
+add_filter( 'rank_math/opengraph/image_source', 'custom_og_image_for_catalogs', 10, 1 );
