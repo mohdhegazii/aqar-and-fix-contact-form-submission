@@ -27,6 +27,13 @@ function get_my_project_box($project_id){
       <span class="project-location">
         <i class="icon-location"></i><?php echo $project_city; ?>
       </span>
+      <?php
+      $developer_terms = get_the_terms($project_id, 'projects_developer');
+      if ( !empty($developer_terms) && !is_wp_error($developer_terms) ) {
+          $developer_name = $developer_terms[0]->name;
+          echo '<span class="project-developer"><i class="icon-building"></i>' . esc_html($developer_name) . '</span>';
+      }
+      ?>
       <a href="<?php echo $url; ?>" class="project-price"><?php get_text('اسعار تبدأ من','Prices starting from'); ?>
         <span><?php echo number_format( intval($price) ); ?> <?php get_text('ج.م','EGP'); ?></span>
       </a>

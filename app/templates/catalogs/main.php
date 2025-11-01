@@ -80,7 +80,7 @@ function get_my_catalogs_main()
               </span>
               <span class="breadcrumbs__separator">›</span>
             </div>
-						<h1 class="project-headline"><?php echo esc_html( $title ); ?></h1>
+						<h1 class="project-headline"><?php echo esc_html( $title ); ?><?php if ( $paged > 1 ) { echo page_suffix( $paged ); } ?></h1>
 					</div>
 				</div>
 			</div>

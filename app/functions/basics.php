@@ -235,7 +235,7 @@ function page_suffix( $n ) {
 
 add_filter( 'pre_get_document_title', function( $title ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $title .= page_suffix( $paged );
   }
   return $title;
@@ -243,7 +243,7 @@ add_filter( 'pre_get_document_title', function( $title ) {
 
 add_filter( 'wpseo_title', function( $title ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $title .= page_suffix( $paged );
   }
   return $title;
@@ -251,7 +251,7 @@ add_filter( 'wpseo_title', function( $title ) {
 
 add_filter( 'wpseo_metadesc', function( $desc ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $desc .= page_suffix( $paged );
   }
   return $desc;
@@ -259,7 +259,7 @@ add_filter( 'wpseo_metadesc', function( $desc ) {
 
 add_filter( 'rank_math/frontend/title', function( $title ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $title .= page_suffix( $paged );
   }
   return $title;
@@ -267,7 +267,7 @@ add_filter( 'rank_math/frontend/title', function( $title ) {
 
 add_filter( 'rank_math/frontend/description', function( $desc ) {
   $paged = max( 1, (int) get_query_var('paged'), (int) get_query_var('page') );
-  if ( $paged > 1 && ( is_singular('catalog') || is_post_type_archive('catalog') ) ) {
+  if ( $paged > 1 && ( is_singular('catalogs') || is_post_type_archive('catalogs') ) ) {
     $desc .= page_suffix( $paged );
   }
   return $desc;
