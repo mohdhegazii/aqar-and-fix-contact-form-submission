@@ -121,7 +121,7 @@ function get_my_catalogs_main()
             <div class="blognavigation">
               <?php
               $base = rtrim($catalog_permalink, '/') . '/page/%#%/';
-              echo paginate_links([
+              $pagination_links = paginate_links([
                 'base'      => $base,
                 'format'    => '',
                 'current'   => $paged,
@@ -132,6 +132,12 @@ function get_my_catalogs_main()
                 'next_text' => __('Next »'),
                 'type'      => 'plain',
               ]);
+
+              // Remove /page/1/ from the first page link
+              $pagination_links = str_replace( "page/1/'", "'", $pagination_links );
+              $pagination_links = str_replace( 'page/1/"', '"', $pagination_links );
+
+              echo $pagination_links;
               ?>
             </div>
           </div>
